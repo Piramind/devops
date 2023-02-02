@@ -20,7 +20,7 @@ Vagrant поднимает несколько виртуальных машин 
 
 ## Использование
 ```
-git clone
+git clone https://github.com/Piramind/devops.git
 cd vagrant-wordpress
 vagrant up
 ```
