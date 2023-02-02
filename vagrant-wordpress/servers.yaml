@@ -1,0 +1,40 @@
+---
+- name: wp
+  nics:
+    - type: "private_network"
+      ip: "192.168.56.10"
+  ram: 1024
+  count: 2
+  files:
+    nginx-config:
+      source: "wp/nginx/wordpress.conf"
+  scripts:
+    - path: "provision/nginx-install.sh"
+    - path: "provision/wordpress-install.sh"
+  dbuser: "mysql"
+  dbpassword: "dbpassword"
+  dbname: "wordpress_db"
+- name: db
+  nics:
+    - type: "private_network"
+      ip: "192.168.56.20"
+  ram: 1024
+  count: 1
+  scripts:
+    - path: "provision/mysql-install.sh"
+  dbuser: "mysql"
+  dbpassword: "dbpassword"
+  dbname: "wordpress_db"
+- name: lb
+  nics:
+    - type: "private_network"
+      ip: "192.168.56.200"
+    - type: "public_network"
+      ip: "192.168.1.200"
+  count: 1
+  ram: 1024
+  files:
+    nginx-config:
+      source: "lb/wordpress-loadbalancer.conf"
+  scripts:
+    - path: "provision/lb-configure.sh"
