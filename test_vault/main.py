@@ -3,6 +3,7 @@ import hvac
 import json
 import random
 
+
 client = hvac.Client(url='http://localhost:8200')
 token = client.auth.token.create(policies=['root'], ttl='1h')
 #client.auth.login(token)
@@ -13,7 +14,6 @@ client.sys.enable_auth_method(
     path='userpass-hvac',
 )
 
-
 # password generation
 lower = string.ascii_lowercase
 upper = string.ascii_uppercase
@@ -22,6 +22,9 @@ symbols = string.punctuation
 all = string.ascii_letters + string.digits + string.punctuation
 temp = random.sample(all, 8)
 pass_word = "".join(temp)
+us_er = input()
+
+client.create_or_update_user(us_er, pass_word) # Типо импортнул метод из api hvac
 
 # login with password
 client.auth.userpass.login(
@@ -37,7 +40,7 @@ create_response = client.secrets.kv.v2.create_or_update_secret(path='hello', sec
 print(json.dumps(create_response, indent=4, sort_keys=True))
 
 
-def create_policy():
+def create_policy(): # сделать 2 политики
     policy = '''
         path "secret/*" {
             capabilities = ["read"]
