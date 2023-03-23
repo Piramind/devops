@@ -14,14 +14,15 @@ temp = random.sample(all, 8)
 pass_word = "".join(temp)
 
 
-client = hvac.Client(url='http://localhost:8200', token = 'hvs.GSgAc8GOLIxCDJOyM2htQyPO')
+client = hvac.Client(url='http://localhost:8200', token = 'hvs.S2eZbgoUrc68ef52rOG2rQic')
 
 print(f" Is client authenticated: {client.is_authenticated()}")
 
 token = client.auth.token.create(policies=['root'], ttl='1h')
+print(token)
 
 # enable userpass method
-client.sys.enable_auth_method('userpass', path='customuserpass')
+#client.sys.enable_auth_method('userpass', path='customuserpass')
 
 client.userpass.create_or_update_user(pass_word)
 client.auth.login(token)
