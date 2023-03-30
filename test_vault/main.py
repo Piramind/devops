@@ -14,18 +14,20 @@ temp = random.sample(all, 8)
 pass_word = "".join(temp)
 
 
-client = hvac.Client(url='http://localhost:8200', token = 'hvs.S2eZbgoUrc68ef52rOG2rQic')
-
+# Подключиться к хранилищу
+client = hvac.Client(url='http://localhost:8200', token = 'hvs.P6D3HN3dZiGMvACB97RQ6dIS')
 print(f" Is client authenticated: {client.is_authenticated()}")
 
+# Создать пользователя
+username = input()
+password = pass_word
+client.write('auth/userpass/users/' +  username, password=password)
+
+# Войдите как новый пользователь
+user_client = hvac.Client(url='localhost:8200')
+user_client.auth_userpass(username, password)
+
 token = client.auth.token.create(policies=['root'], ttl='1h')
-print(token)
-
-# enable userpass method
-#client.sys.enable_auth_method('userpass', path='customuserpass')
-
-client.userpass.create_or_update_user(pass_word)
-client.auth.login(token)
 
 
 create_response = client.secrets.kv.v2.create_or_update_secret(path='secret', secret={foo:"bar"})
