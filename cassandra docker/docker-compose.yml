@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  cassandra1:
+    image: cassandra:latest
+    container_name: cassandra1
+    ports:
+      - "9042:9042"
+    networks:
+      - cassandra-network
+    environment:
+      - CASSANDRA_CLUSTER_NAME=MyCassandraCluster
+      - CASSANDRA_SEEDS=cassandra1,cassandra2,cassandra3
+    volumes:
+      - cassandra1-data:/var/lib/cassandra
+
+  cassandra2:
+    image: cassandra:latest
+    container_name: cassandra2
+    ports:
+      - "9043:9042"
+    networks:
+      - cassandra-network
+    environment:
+      - CASSANDRA_CLUSTER_NAME=MyCassandraCluster
+      - CASSANDRA_SEEDS=cassandra1,cassandra2,cassandra3
+    volumes:
+      - cassandra2-data:/var/lib/cassandra
+
+  cassandra3:
+    image: cassandra:latest
+    container_name: cassandra3
+    ports:
+      - "9044:9042"
+    networks:
+      - cassandra-network
+    environment:
+      - CASSANDRA_CLUSTER_NAME=MyCassandraCluster
+      - CASSANDRA_SEEDS=cassandra1,cassandra2,cassandra3
+    volumes:
+      - cassandra3-data:/var/lib/cassandra
+
+networks:
+  cassandra-network:
+
+volumes:
+  cassandra1-data:
+  cassandra2-data:
+  cassandra3-data:
