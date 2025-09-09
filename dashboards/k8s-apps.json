@@ -1,0 +1,173 @@
+{
+  "title": "Kubernetes + Infra Monitoring (По требованиям)",
+  "schemaVersion": 39,
+  "version": 1,
+  "uid": null,
+  "tags": ["infra", "apps", "kubernetes"],
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "refresh": "30s",
+  "panels": [
+    {
+      "title": "== Аппаратное обеспечение ==",
+      "type": "row",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0}
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU Load (Node)",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 1},
+      "targets": [
+        {"expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)", "legendFormat": "{{instance}}"}
+      ],
+      "datasource": {"type": "prometheus", "uid": "$datasource"},
+      "fieldConfig": {"defaults": {"unit": "percent"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory Usage (Node)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 1},
+      "targets": [
+        {"expr": "100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))", "legendFormat": "{{instance}}"}
+      ],
+      "datasource": {"type": "prometheus", "uid": "$datasource"},
+      "fieldConfig": {"defaults": {"unit": "percent"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Disk Usage %",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 9},
+      "targets": [
+        {"expr": "100 - (node_filesystem_free_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes{fstype!=\"tmpfs\"}) * 100", "legendFormat": "{{instance}} {{mountpoint}}"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "percent"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Network Traffic",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 9},
+      "targets": [
+        {"expr": "rate(node_network_receive_bytes_total[5m])", "legendFormat": "{{instance}} RX"},
+        {"expr": "rate(node_network_transmit_bytes_total[5m])", "legendFormat": "{{instance}} TX"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "Bps"}}
+    },
+
+    {
+      "title": "== Системное ПО ==",
+      "type": "row",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 17}
+    },
+    {
+      "type": "stat",
+      "title": "System Time Sync Offset",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 18},
+      "targets": [
+        {"expr": "node_timex_offset_seconds", "legendFormat": "{{instance}}"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "System Errors (Logs)",
+      "gridPos": {"h": 8, "w": 12, "x": 6, "y": 18},
+      "targets": [
+        {"expr": "rate(node_syslog_errors_total[5m])", "legendFormat": "{{instance}}"}
+      ]
+    },
+
+    {
+      "title": "== Прикладное ПО ==",
+      "type": "row",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 26}
+    },
+    {
+      "type": "timeseries",
+      "title": "App Requests (to DB)",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 27},
+      "targets": [
+        {"expr": "rate(app_db_requests_total{namespace=~\"$namespace\"}[5m])", "legendFormat": "{{pod}}"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "App Errors",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 27},
+      "targets": [
+        {"expr": "rate(app_errors_total{namespace=~\"$namespace\"}[5m])", "legendFormat": "{{pod}}"}
+      ]
+    },
+
+    {
+      "title": "== СУБД и БД ==",
+      "type": "row",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 35}
+    },
+    {
+      "type": "stat",
+      "title": "DB Up",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 36},
+      "targets": [
+        {"expr": "pg_up or mysql_up", "legendFormat": "{{instance}}"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "DB Size",
+      "gridPos": {"h": 8, "w": 12, "x": 6, "y": 36},
+      "targets": [
+        {"expr": "pg_database_size_bytes{datname!~\"template.*\"}", "legendFormat": "{{datname}}"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes"}}
+    },
+    {
+      "type": "timeseries",
+      "title": "DB Errors",
+      "gridPos": {"h": 8, "w": 12, "x": 18, "y": 36},
+      "targets": [
+        {"expr": "rate(pg_stat_database_xact_rollback[5m])", "legendFormat": "{{datname}} rollback"}
+      ]
+    },
+
+    {
+      "title": "== Внешние системы ==",
+      "type": "row",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 44}
+    },
+    {
+      "type": "timeseries",
+      "title": "External Systems Availability",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 45},
+      "targets": [
+        {"expr": "probe_success{job=\"blackbox\"}", "legendFormat": "{{instance}}"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "External Data Transfer (Success %)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 45},
+      "targets": [
+        {"expr": "rate(external_transfer_success_total[5m]) / rate(external_transfer_total[5m]) * 100", "legendFormat": "{{job}}"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "percent"}}
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus"
+      },
+      {
+        "name": "namespace",
+        "type": "query",
+        "datasource": {"type": "prometheus", "uid": "$datasource"},
+        "query": "label_values(kube_pod_info, namespace)",
+        "multi": true,
+        "includeAll": true
+      }
+    ]
+  }
+}
