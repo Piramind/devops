@@ -1,0 +1,8 @@
+[Unit]
+Description=One-shot monitor for process "test"
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/monitor_test.sh
+# Run as root (default). Если нужно другой пользователь, добавить User=
